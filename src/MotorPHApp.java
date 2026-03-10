@@ -17,7 +17,11 @@ public class MotorPHApp {
             "July", "August", "September", "October", "November", "December"
     };
 
-    // Entry point. Asks for login and routes to the correct menu.
+    // This is the entry point of the application. It prompts the user to enter a username
+    // and password, then compares the input against two hardcoded credential sets to determine
+    // which menu to display. If the credentials match "employee", the employee menu is shown.
+    // If they match "payroll_staff", the payroll menu is shown. Otherwise, access is denied
+    // and an error message is displayed.
     public static void main(String[] args) throws Exception {
         System.out.print("Username: ");
         String username = scanner.nextLine();
@@ -35,7 +39,10 @@ public class MotorPHApp {
 
     // ==================== EMPLOYEE MENU ====================
 
-    // Shows the employee menu and handles the user's choice.
+    // This method displays the employee menu and keeps it active in a loop until the user
+    // chooses to exit. It presents two options: entering an employee number to search for
+    // the employee, or exiting the program. The user's input is read and matched using a switch
+    // statement, and any unrecognized input triggers an error message before looping again.
     public static void employeeMenu() throws Exception {
         while (true) {
             System.out.println("\n--- Employee Menu ---");
@@ -57,7 +64,11 @@ public class MotorPHApp {
         }
     }
 
-    // Asks for an employee number and prints their basic info if found.
+    // This method asks the user to input an employee number, then searches the employee CSV
+    // file line by line for a matching record. Each line is parsed using parseCSVLine() to
+    // extract individual fields. If a match is found, the employee's number, full name, and
+    // birthday are printed. If no match is found after reading all records,
+    // the user is informed that the employee number does not exist.
     public static void searchEmployee() throws Exception {
         System.out.print("\nEnter employee number: ");
         String employeeNumber = scanner.nextLine();
@@ -86,7 +97,11 @@ public class MotorPHApp {
 
     // ==================== PAYROLL MENU ====================
 
-    // Shows the payroll staff menu and handles the user's choice.
+    // This method displays the payroll staff menu and keeps it active in a loop until the
+    // user chooses to exit. It presents two options: processing payroll or exiting the
+    // program. The user's input is read and matched using a switch statement. Selecting
+    // option 1 calls processPayrollMenu(), and any unrecognized input triggers an error
+    // message before the loop repeats.
     public static void payrollMenu() throws Exception {
         while (true) {
             System.out.println("\n--- Payroll Staff Menu ---");
@@ -108,7 +123,12 @@ public class MotorPHApp {
         }
     }
 
-    // Asks whether to process one employee or all, then runs the payroll.
+    // This method presents a sub-menu that allows payroll staff to process payroll either
+    // for a single employee or for all employees at once. For a single employee, it prompts
+    // for an employee number, uses findEmployee() to locate their record, and then calls
+    // displayPayroll() with the result. For all employees, it opens the employee CSV file,
+    // reads each record line by line, and calls displayPayroll() on each one. Selecting
+    // option 3 returns to the previous menu.
     public static void processPayrollMenu() throws Exception {
         while (true) {
             System.out.println("\n--- Process Payroll ---");
@@ -150,7 +170,14 @@ public class MotorPHApp {
 
     // ==================== PAYROLL DISPLAY ====================
 
-    // Prints the full payroll breakdown of an employee for each semi-monthly period.
+    // This method prints a complete payroll breakdown for the given employee, covering the
+    // months of June through December. For each month, it divides the period into two:
+    // days 1 to 15, and days 16 to the end of the month. Hours worked for each half
+    // are calculated using computeHoursForPeriod() and multiplied by the hourly rate to get
+    // the gross salary. Deductions: SSS, PhilHealth, Pag-IBIG, and withholding tax are
+    // computed once per month using the employee's monthly salary and applied entirely in the
+    // second half of the month. The net salary for the second half is derived by subtracting
+    // all deductions from the second half's gross salary.
     public static void displayPayroll(String[] empData) throws Exception {
         String empNum = empData[0];
         String empName = empData[1] + ", " + empData[2];
@@ -196,7 +223,12 @@ public class MotorPHApp {
 
     // ==================== HOURS CALCULATION ====================
 
-    // Adds up all hours worked by an employee within a given date range in a month.
+    // This method calculates the total hours worked by a specific employee within a defined
+    // date range in a given month. It reads through the attendance CSV file and skips any
+    // records that do not belong to the target employee. For each matching record, it parses
+    // the date to verify it falls within the specified day range, then calls computeDailyHours()
+    // with the login and logout times to get that day's hours worked. All daily values are
+    // accumulated and returned as a total.
     public static double computeHoursForPeriod(String empNum, int month, int startDay, int endDay) throws Exception {
         double totalHours = 0;
         BufferedReader reader = new BufferedReader(new FileReader(attendanceRecords));
@@ -219,7 +251,13 @@ public class MotorPHApp {
         return totalHours;
     }
 
-    // Computes how many hours an employee actually worked in a day, minus the lunch break.
+    // This method computes the number of hours an employee worked in a single day
+    // based on their login and logout times. It enforces a work window of 8:00 AM to 5:00 PM,
+    // capping any early arrivals or late departures to those boundaries. A 10-minute grace
+    // period is applied at the start — logins at or before 8:10 AM are treated as exactly
+    // 8:00 AM, while logins after 8:10 AM use the actual time. A one-hour lunch break is
+    // automatically deducted if total time worked exceeds 60 minutes. The result is returned
+    // as a decimal value representing hours worked.
     public static double computeDailyHours(String logIn, String logOut) {
         DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("H:mm");
         LocalTime start = LocalTime.parse(logIn, timeFormat);
@@ -228,8 +266,8 @@ public class MotorPHApp {
         LocalTime workEnd = LocalTime.of(17, 0);
         LocalTime graceEnd = LocalTime.of(8, 10); // 10-minute grace period
 
-        // If login is early or within grace period (8:00–8:10), treat as 8:00
-        // If login is 8:11 or later, use actual login time
+        // If login is early or within grace period (8:00–8:10), treat as 8:00.
+        // If login is 8:11 or later, use actual login time.
         LocalTime effectiveStart;
         if (!start.isAfter(graceEnd)) {
             effectiveStart = workStart;
@@ -255,7 +293,10 @@ public class MotorPHApp {
 
     // ==================== DEDUCTIONS ====================
 
-    // Returns the SSS contribution based on the salary bracket.
+    // This method determines the employee's SSS contribution by comparing their gross monthly
+    // salary against a tiered bracket table defined by SSS. Each bracket
+    // maps a salary range to a fixed contribution amount.
+    // The method returns the fixed contribution amount corresponding to the matching bracket.
     public static double computeSSS(double grossSalary) {
         if (grossSalary < 3250) {
             return 135.00;
@@ -350,18 +391,27 @@ public class MotorPHApp {
         }
     }
 
-    // Returns the PhilHealth contribution based on the salary.
+    // This method computes the employee's share of the monthly PhilHealth premium.
+    // The total premium rate is 3% of the gross salary, split equally between the employee
+    // and employer, making the employee's effective rate 1.5%. Salaries below ₱10,000 incur
+    // no contribution. Salaries from ₱10,000 up to ₱59,999.99 are charged at 1.5% of the
+    // gross salary. Salaries at ₱60,000 and above are capped at ₱900.00, which is the
+    // employee's share of the total premium of ₱1,800.00.
     public static double computePhilHealth(double grossSalary) {
-        if (grossSalary <= 10000) {
-            return 300.00;
-        } else if (grossSalary >= 10000.01 && grossSalary <= 59999.99) {
-            return (grossSalary * 0.03) / 2; // employee share is 50%
+        if (grossSalary < 10000) {
+            return 0.00;
+        } else if (grossSalary <= 59999.99) {
+            return grossSalary * 0.015; // employee share is 50% of 3%
         } else {
-            return 1800.00;
+            return 900.00;
         }
     }
 
-    // Returns the Pag-IBIG contribution, capped at 100.
+    // This method calculates the employee's monthly Pag-IBIG contribution based on
+    // their gross salary. Salaries below ₱1,000 incur no contribution. Salaries from ₱1,000
+    // to ₱1,500 are charged at 1% of the gross salary, while salaries above ₱1,500 are
+    // charged at 2%. Regardless of the computed rate, the contribution is capped at a maximum
+    // of ₱100.00 per month, and that capped value is returned if the calculation exceeds it.
     public static double computePagIbig(double grossSalary) {
         double contribution;
         if (grossSalary < 1000) {
@@ -379,7 +429,10 @@ public class MotorPHApp {
         return contribution;
     }
 
-    // Returns the withholding tax based on the taxable income bracket.
+    // This method calculates the employee's monthly withholding tax based on the
+    // tax table applied to the taxable income. Income at or below ₱20,832
+    // is fully tax-exempt. Each bracket above that applies its corresponding rate only
+    // to the amount exceeding that bracket's lower bound. The computed tax is then returned.
     public static double computeWithholdingTax(double taxableIncome) {
         double tax = 0.0;
 
@@ -400,10 +453,14 @@ public class MotorPHApp {
         return tax;
     }
 
-
     // ==================== UTILITY ====================
 
-    // Splits a CSV line into fields correctly, ignoring commas inside quotes.
+    // This method parses a single line from a CSV file into an array of string fields,
+    // correctly handling fields that contain commas within double quotes. It first counts
+    // the number of fields by scanning for unquoted commas, then performs a second pass
+    // to extract each field's value. When a double-quote character is encountered, the
+    // method toggles an inQuotes flag to tell apart commas inside quotes from commas
+    // outside them. The resulting array of fields is returned for further processing.
     public static String[] parseCSVLine(String line) {
         int count = 1;
         boolean inQuotes = false;
@@ -436,12 +493,19 @@ public class MotorPHApp {
         return fields;
     }
 
-    // Strips commas and quotes from a money string and converts it to a number.
+    // This method converts a money-formatted string value into a plain double. It works
+    // by first trimming any leading or trailing whitespace, then removing all commas and
+    // double-quote characters that may be present due to CSV formatting, before passing
+    // the cleaned string to Double.parseDouble() for conversion.
     public static double parseMoney(String value) {
         return Double.parseDouble(value.trim().replace(",", "").replace("\"", ""));
     }
 
-    // Searches the employee CSV for a matching employee number and returns their data.
+    // This method searches the employee CSV file for a record matching the given employee
+    // number. It reads each line of the file, parses it into fields using parseCSVLine(),
+    // and compares the first field against the provided employee number. If a match is found,
+    // the file is closed and the data for that employee is returned. If no match
+    // exists after reading all records, the file is closed and null is returned.
     public static String[] findEmployee(String empNum) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(employeeData));
         reader.readLine(); // Skip the first line
