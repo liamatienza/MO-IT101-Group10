@@ -160,7 +160,6 @@ public class MotorPHApp {
         String employeeNumber = employeeData[0];
         String employeeName = employeeData[1] + ", " + employeeData[2];
         String birthday = employeeData[3];
-        double monthlySalary = parseMoney(employeeData[13]);
         double hourlyRate = parseMoney(employeeData[18]);
         int year = getYearFromAttendance(employeeNumber);
 
@@ -176,9 +175,9 @@ public class MotorPHApp {
             double hours2nd = computeHoursForPeriod(employeeNumber, month, 16, lastDay);
             double gross2nd = hours2nd * hourlyRate;
             double totalGross = gross1st + gross2nd;
-            double sss = computeSSS(monthlySalary);
-            double philHealth = computePhilHealth(monthlySalary);
-            double pagIbig = computePagIbig(monthlySalary);
+            double sss = computeSSS(totalGross);
+            double philHealth = computePhilHealth(totalGross);
+            double pagIbig = computePagIbig(totalGross);
             double taxableIncome = totalGross - (sss + philHealth + pagIbig);
             double tax = computeWithholdingTax(taxableIncome);
             double totalDeductions = sss + philHealth + pagIbig + tax;
