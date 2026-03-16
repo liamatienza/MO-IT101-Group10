@@ -44,7 +44,7 @@ public class MotorPHApp {
             System.out.println("1. Enter Employee Number");
             System.out.println("2. Exit the program");
             System.out.print("Enter your choice: ");
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
@@ -97,7 +97,7 @@ public class MotorPHApp {
             System.out.println("1. Process Payroll");
             System.out.println("2. Exit the program");
             System.out.print("Enter your choice: ");
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
@@ -120,7 +120,7 @@ public class MotorPHApp {
             System.out.println("2. All employees");
             System.out.println("3. Back");
             System.out.print("Enter your choice: ");
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
@@ -135,7 +135,7 @@ public class MotorPHApp {
                     break;
                 case "2":
                     BufferedReader reader = new BufferedReader(new FileReader(employeeData));
-                    reader.readLine(); // skip header
+                    reader.readLine(); // Skip First Line
                     String line;
                     while ((line = reader.readLine()) != null) {
                         String[] data = parseCSVLine(line);
@@ -161,6 +161,7 @@ public class MotorPHApp {
         String empName = empData[1] + ", " + empData[2];
         double monthlySalary = parseMoney(empData[13]);
         double hourlyRate = parseMoney(empData[18]);
+        int year = getYearFromAttendance(empNum);
 
         System.out.println("\nEmployee #: " + empNum);
         System.out.println("Employee Name: " + empName);
@@ -168,7 +169,7 @@ public class MotorPHApp {
         System.out.println("Hourly Rate: " + hourlyRate);
 
         for (int month = 6; month <= 12; month++) {
-            int lastDay = YearMonth.of(2024, month).lengthOfMonth();
+            int lastDay = YearMonth.of(year, month).lengthOfMonth();
             double hours1 = computeHoursForPeriod(empNum, month, 1, 15);
             double gross1 = hours1 * hourlyRate;
             double hours2 = computeHoursForPeriod(empNum, month, 16, lastDay);
@@ -466,5 +467,21 @@ public class MotorPHApp {
         }
         reader.close();
         return null;
+    }
+
+    // Reads the year from the first matching attendance record for the given employee.
+    public static int getYearFromAttendance(String empNum) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(attendanceRecords));
+        reader.readLine(); // Skip first line
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] attData = parseCSVLine(line);
+            if (attData[0].trim().equals(empNum)) {
+                reader.close();
+                return Integer.parseInt(attData[3].trim().split("/")[2]);
+            }
+        }
+        reader.close();
+        return java.time.Year.now().getValue(); // Fallback to Current Year if no exact year is found.
     }
 }
