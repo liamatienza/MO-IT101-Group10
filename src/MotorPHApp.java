@@ -65,8 +65,7 @@ public class MotorPHApp {
         System.out.print("\nEnter employee number: ");
         String employeeNumber = scanner.nextLine();
 
-        BufferedReader reader = new BufferedReader(new FileReader(employeeDataFile));
-        reader.readLine(); // Skip the First Line
+        BufferedReader reader = openFile(employeeDataFile);
         String line;
         boolean found = false;
 
@@ -134,8 +133,7 @@ public class MotorPHApp {
                     }
                     break;
                 case "2":
-                    BufferedReader reader = new BufferedReader(new FileReader(employeeDataFile));
-                    reader.readLine(); // Skip First Line
+                    BufferedReader reader = openFile(employeeDataFile);
                     String line;
                     while ((line = reader.readLine()) != null) {
                         String[] data = parseCSVLine(line);
@@ -206,8 +204,7 @@ public class MotorPHApp {
     // by reading and filtering the attendance CSV records.
     public static double computeHoursForPeriod(String employeeNumber, int monthInput, int startDay, int endDay) throws Exception {
         double totalHours = 0;
-        BufferedReader reader = new BufferedReader(new FileReader(attendanceRecords));
-        reader.readLine(); // Skip the First Line
+        BufferedReader reader = openFile(attendanceRecords);
         String line;
 
         while ((line = reader.readLine()) != null) {
@@ -263,99 +260,27 @@ public class MotorPHApp {
 
     // ==================== DEDUCTIONS ====================
 
-    // Returns the employee's SSS contribution based on a tiered salary bracket table.
+    // Returns the employee's SSS contribution by looking up the gross salary
+    // against a tiered bracket table stored in a 2D array.
     public static double computeSSS(double grossSalary) {
-        if (grossSalary < 3250) {
-            return 135.00;
-        } else if (grossSalary >= 3250 && grossSalary <= 3750) {
-            return 157.50;
-        } else if (grossSalary >= 3750 && grossSalary <= 4250) {
-            return 180.00;
-        } else if (grossSalary >= 4250 && grossSalary <= 4750) {
-            return 202.50;
-        } else if (grossSalary >= 4750 && grossSalary <= 5250) {
-            return 225.00;
-        } else if (grossSalary >= 5250 && grossSalary <= 5750) {
-            return 247.50;
-        } else if (grossSalary >= 5750 && grossSalary <= 6250) {
-            return 270.00;
-        } else if (grossSalary >= 6250 && grossSalary <= 6750) {
-            return 292.50;
-        } else if (grossSalary >= 6750 && grossSalary <= 7250) {
-            return 315.00;
-        } else if (grossSalary >= 7250 && grossSalary <= 7750) {
-            return 337.50;
-        } else if (grossSalary >= 7750 && grossSalary <= 8250) {
-            return 360.00;
-        } else if (grossSalary >= 8250 && grossSalary <= 8750) {
-            return 382.50;
-        } else if (grossSalary >= 8750 && grossSalary <= 9250) {
-            return 405.00;
-        } else if (grossSalary >= 9250 && grossSalary <= 9750) {
-            return 427.50;
-        } else if (grossSalary >= 9750 && grossSalary <= 10250) {
-            return 450.00;
-        } else if (grossSalary >= 10250 && grossSalary <= 10750) {
-            return 472.50;
-        } else if (grossSalary >= 10750 && grossSalary <= 11250) {
-            return 495.00;
-        } else if (grossSalary >= 11250 && grossSalary <= 11750) {
-            return 517.50;
-        } else if (grossSalary >= 11750 && grossSalary <= 12250) {
-            return 540.00;
-        } else if (grossSalary >= 12250 && grossSalary <= 12750) {
-            return 562.50;
-        } else if (grossSalary >= 12750 && grossSalary <= 13250) {
-            return 585.00;
-        } else if (grossSalary >= 13250 && grossSalary <= 13750) {
-            return 607.50;
-        } else if (grossSalary >= 13750 && grossSalary <= 14250) {
-            return 630.00;
-        } else if (grossSalary >= 14250 && grossSalary <= 14750) {
-            return 652.50;
-        } else if (grossSalary >= 14750 && grossSalary <= 15250) {
-            return 675.00;
-        } else if (grossSalary >= 15250 && grossSalary <= 15750) {
-            return 697.50;
-        } else if (grossSalary >= 15750 && grossSalary <= 16250) {
-            return 720.00;
-        } else if (grossSalary >= 16250 && grossSalary <= 16750) {
-            return 742.50;
-        } else if (grossSalary >= 16750 && grossSalary <= 17250) {
-            return 765.00;
-        } else if (grossSalary >= 17250 && grossSalary <= 17750) {
-            return 787.50;
-        } else if (grossSalary >= 17750 && grossSalary <= 18250) {
-            return 810.00;
-        } else if (grossSalary >= 18250 && grossSalary <= 18750) {
-            return 832.50;
-        } else if (grossSalary >= 18750 && grossSalary <= 19250) {
-            return 855.00;
-        } else if (grossSalary >= 19250 && grossSalary <= 19750) {
-            return 877.50;
-        } else if (grossSalary >= 19750 && grossSalary <= 20250) {
-            return 900.00;
-        } else if (grossSalary >= 20250 && grossSalary <= 20750) {
-            return 922.50;
-        } else if (grossSalary >= 20750 && grossSalary <= 21250) {
-            return 945.00;
-        } else if (grossSalary >= 21250 && grossSalary <= 21750) {
-            return 967.50;
-        } else if (grossSalary >= 21750 && grossSalary <= 22250) {
-            return 990.00;
-        } else if (grossSalary >= 22250 && grossSalary <= 22750) {
-            return 1012.50;
-        } else if (grossSalary >= 22750 && grossSalary <= 23250) {
-            return 1035.00;
-        } else if (grossSalary >= 23250 && grossSalary <= 23750) {
-            return 1057.50;
-        } else if (grossSalary >= 23750 && grossSalary <= 24250) {
-            return 1080.00;
-        } else if (grossSalary >= 24250 && grossSalary <= 24750) {
-            return 1102.50;
-        } else {
-            return 1125.00;
+        double[][] sssBrackets = {
+                { 3250, 135.00 },  { 3750, 157.50 },  { 4250, 180.00 },  { 4750, 202.50 },
+                { 5250, 225.00 },  { 5750, 247.50 },  { 6250, 270.00 },  { 6750, 292.50 },
+                { 7250, 315.00 },  { 7750, 337.50 },  { 8250, 360.00 },  { 8750, 382.50 },
+                { 9250, 405.00 },  { 9750, 427.50 },  { 10250, 450.00 }, { 10750, 472.50 },
+                { 11250, 495.00 }, { 11750, 517.50 }, { 12250, 540.00 }, { 12750, 562.50 },
+                { 13250, 585.00 }, { 13750, 607.50 }, { 14250, 630.00 }, { 14750, 652.50 },
+                { 15250, 675.00 }, { 15750, 697.50 }, { 16250, 720.00 }, { 16750, 742.50 },
+                { 17250, 765.00 }, { 17750, 787.50 }, { 18250, 810.00 }, { 18750, 832.50 },
+                { 19250, 855.00 }, { 19750, 877.50 }, { 20250, 900.00 }, { 20750, 922.50 },
+                { 21250, 945.00 }, { 21750, 967.50 }, { 22250, 990.00 }, { 22750, 1012.50 },
+                { 23250, 1035.00 }, { 23750, 1057.50 }, { 24250, 1080.00 }, { 24750, 1102.50 }
+        };
+
+        for (double[] bracket : sssBrackets) {
+            if (grossSalary < bracket[0]) return bracket[1];
         }
+        return 1125.00; // 24,750 and over
     }
 
     // Returns the employee's PhilHealth contribution at 1.5% of gross salary,
@@ -413,6 +338,13 @@ public class MotorPHApp {
 
     // ==================== UTILITY ====================
 
+    // Opens a CSV file and skips the header line, returning a ready-to-read BufferedReader.
+    public static BufferedReader openFile(String filePath) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        reader.readLine(); // Skip header line
+        return reader;
+    }
+
     // Parses a CSV line into a string array, treating commas inside
     // double quotes as part of the field rather than a separator.
     public static String[] parseCSVLine(String line) {
@@ -455,8 +387,7 @@ public class MotorPHApp {
     // Searches the employee CSV for a matching employee number and returns their data,
     // or null if not found.
     public static String[] findEmployee(String employeeNumber) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(employeeDataFile));
-        reader.readLine(); // Skip the first line
+        BufferedReader reader = openFile(employeeDataFile);
         String line;
         while ((line = reader.readLine()) != null) {
             String[] employeeData = parseCSVLine(line);
@@ -471,8 +402,7 @@ public class MotorPHApp {
 
     // Reads the year from the first matching attendance record for the given employee.
     public static int getYearFromAttendance(String employeeNumber) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(attendanceRecords));
-        reader.readLine(); // Skip first line
+        BufferedReader reader = openFile(attendanceRecords);
         String line;
         while ((line = reader.readLine()) != null) {
             String[] attendanceData = parseCSVLine(line);
@@ -482,6 +412,6 @@ public class MotorPHApp {
             }
         }
         reader.close();
-        return java.time.Year.now().getValue(); // Fallback to Current Year if no exact year is found.
+        return java.time.Year.now().getValue(); // Fallback to current year if no record is found.
     }
 }
