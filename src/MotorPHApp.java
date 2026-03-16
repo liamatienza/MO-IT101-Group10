@@ -350,6 +350,7 @@ public class MotorPHApp {
     // Parses a CSV line into a string array, treating commas inside
     // double quotes as part of the field rather than a separator.
     public static String[] parseCSVLine(String line) {
+        // Count total fields by tracking commas outside quoted sections.
         int count = 1;
         boolean inQuotes = false;
         for (int i = 0; i < line.length(); i++) {
@@ -361,6 +362,7 @@ public class MotorPHApp {
             }
         }
 
+        // Extract each field, splitting only on unquoted commas.
         String[] fields = new String[count];
         int fieldIndex = 0;
         inQuotes = false;
@@ -377,7 +379,9 @@ public class MotorPHApp {
                 current += c;
             }
         }
+        // Save the last field since it has no trailing comma.
         fields[fieldIndex] = current;
+        
         return fields;
     }
 
