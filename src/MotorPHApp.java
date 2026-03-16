@@ -277,9 +277,11 @@ public class MotorPHApp {
                 { 23250, 1035.00 }, { 23750, 1057.50 }, { 24250, 1080.00 }, { 24750, 1102.50 }
         };
 
+        // Scan and return the contribution for the first matching bracket.
         for (double[] bracket : sssBrackets) {
             if (grossSalary < bracket[0]) return bracket[1];
         }
+
         return 1125.00; // 24,750 and over
     }
 
