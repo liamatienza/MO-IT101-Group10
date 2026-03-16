@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public class MotorPHApp {
     public static Scanner scanner = new Scanner(System.in);
-    public static String employeeData = "MotorPH_Employee Data - Employee Details.csv";
+    public static String employeeDataFile = "MotorPH_Employee Data - Employee Details.csv";
     public static String attendanceRecords = "MotorPH_Employee Data - Attendance Record.csv";
 
     static final String[] MONTH_NAMES = {
@@ -65,18 +65,18 @@ public class MotorPHApp {
         System.out.print("\nEnter employee number: ");
         String employeeNumber = scanner.nextLine();
 
-        BufferedReader reader = new BufferedReader(new FileReader(employeeData));
+        BufferedReader reader = new BufferedReader(new FileReader(employeeDataFile));
         reader.readLine(); // Skip the First Line
         String line;
         boolean found = false;
 
         while ((line = reader.readLine()) != null) {
-            String[] empData = parseCSVLine(line);
-            if (empData[0].trim().equals(employeeNumber)) {
+            String[] employeeData = parseCSVLine(line);
+            if (employeeData[0].trim().equals(employeeNumber)) {
                 System.out.println("\n===============================");
-                System.out.println("Employee Number: " + empData[0]);
-                System.out.println("Employee Name: " + empData[1] + ", " + empData[2]);
-                System.out.println("Birthday: " + empData[3]);
+                System.out.println("Employee Number: " + employeeData[0]);
+                System.out.println("Employee Name: " + employeeData[1] + ", " + employeeData[2]);
+                System.out.println("Birthday: " + employeeData[3]);
                 System.out.println("===============================");
                 found = true;
                 break;
@@ -125,16 +125,16 @@ public class MotorPHApp {
             switch (choice) {
                 case "1":
                     System.out.print("Enter employee number: ");
-                    String empNum = scanner.nextLine().trim();
-                    String[] empData = findEmployee(empNum);
-                    if (empData == null) {
+                    String employeeNumber = scanner.nextLine().trim();
+                    String[] employeeData = findEmployee(employeeNumber);
+                    if (employeeData == null) {
                         System.out.println("Employee number does not exist.");
                     } else {
-                        displayPayroll(empData);
+                        displayPayroll(employeeData);
                     }
                     break;
                 case "2":
-                    BufferedReader reader = new BufferedReader(new FileReader(employeeData));
+                    BufferedReader reader = new BufferedReader(new FileReader(employeeDataFile));
                     reader.readLine(); // Skip First Line
                     String line;
                     while ((line = reader.readLine()) != null) {
@@ -156,25 +156,26 @@ public class MotorPHApp {
 
     // Prints a full payroll breakdown for the given employee across June to December,
     // split into two periods per month with deductions applied in the second half.
-    public static void displayPayroll(String[] empData) throws Exception {
-        String empNum = empData[0];
-        String empName = empData[1] + ", " + empData[2];
-        double monthlySalary = parseMoney(empData[13]);
-        double hourlyRate = parseMoney(empData[18]);
-        int year = getYearFromAttendance(empNum);
+    public static void displayPayroll(String[] employeeData) throws Exception {
+        String employeeNumber = employeeData[0];
+        String employeeName = employeeData[1] + ", " + employeeData[2];
+        String birthday = employeeData[3];
+        double monthlySalary = parseMoney(employeeData[13]);
+        double hourlyRate = parseMoney(employeeData[18]);
+        int year = getYearFromAttendance(employeeNumber);
 
-        System.out.println("\nEmployee #: " + empNum);
-        System.out.println("Employee Name: " + empName);
-        System.out.println("Birthday: " + empData[3]);
+        System.out.println("\nEmployee #: " + employeeNumber);
+        System.out.println("Employee Name: " + employeeName);
+        System.out.println("Birthday: " + birthday);
         System.out.println("Hourly Rate: " + hourlyRate);
 
         for (int month = 6; month <= 12; month++) {
             int lastDay = YearMonth.of(year, month).lengthOfMonth();
-            double hours1 = computeHoursForPeriod(empNum, month, 1, 15);
-            double gross1 = hours1 * hourlyRate;
-            double hours2 = computeHoursForPeriod(empNum, month, 16, lastDay);
-            double gross2 = hours2 * hourlyRate;
-            double totalGross = gross1 + gross2;
+            double hours1st = computeHoursForPeriod(employeeNumber, month, 1, 15);
+            double gross1st = hours1st * hourlyRate;
+            double hours2nd = computeHoursForPeriod(employeeNumber, month, 16, lastDay);
+            double gross2nd = hours2nd * hourlyRate;
+            double totalGross = gross1st + gross2nd;
             double sss = computeSSS(monthlySalary);
             double philHealth = computePhilHealth(monthlySalary);
             double pagIbig = computePagIbig(monthlySalary);
@@ -183,20 +184,20 @@ public class MotorPHApp {
             double totalDeductions = sss + philHealth + pagIbig + tax;
 
             System.out.println("\n--- " + MONTH_NAMES[month] + " 1 to 15 ---");
-            System.out.printf("Total Hours Worked: %.2f%n", hours1);
-            System.out.printf("Gross Salary: ₱%,.2f%n", gross1);
-            System.out.printf("Net Salary: ₱%,.2f%n", gross1);
+            System.out.printf("Total Hours Worked: %.2f%n", hours1st);
+            System.out.printf("Gross Salary: ₱%,.2f%n", gross1st);
+            System.out.printf("Net Salary: ₱%,.2f%n", gross1st);
 
             System.out.println("\n--- " + MONTH_NAMES[month] + " 16 to " + lastDay + " ---");
-            System.out.printf("Total Hours Worked: %.2f%n", hours2);
-            System.out.printf("Gross Salary: ₱%,.2f%n", gross2);
+            System.out.printf("Total Hours Worked: %.2f%n", hours2nd);
+            System.out.printf("Gross Salary: ₱%,.2f%n", gross2nd);
             System.out.println("Deductions:");
             System.out.printf("  SSS: ₱%,.2f%n", sss);
             System.out.printf("  PhilHealth: ₱%,.2f%n", philHealth);
             System.out.printf("  Pag-IBIG: ₱%,.2f%n", pagIbig);
             System.out.printf("  Tax: ₱%,.2f%n", tax);
             System.out.printf("Total Deductions: ₱%,.2f%n", totalDeductions);
-            System.out.printf("Net Salary: ₱%,.2f%n", gross2 - totalDeductions);
+            System.out.printf("Net Salary: ₱%,.2f%n", gross2nd - totalDeductions);
         }
     }
 
@@ -204,22 +205,22 @@ public class MotorPHApp {
 
     // Calculates total hours worked by an employee within a given date range in a month
     // by reading and filtering the attendance CSV records.
-    public static double computeHoursForPeriod(String empNum, int month, int startDay, int endDay) throws Exception {
+    public static double computeHoursForPeriod(String employeeNumber, int monthInput, int startDay, int endDay) throws Exception {
         double totalHours = 0;
         BufferedReader reader = new BufferedReader(new FileReader(attendanceRecords));
         reader.readLine(); // Skip the First Line
         String line;
 
         while ((line = reader.readLine()) != null) {
-            String[] attData = parseCSVLine(line);
-            if (!attData[0].trim().equals(empNum)) continue;
+            String[] attendanceData = parseCSVLine(line);
+            if (!attendanceData[0].trim().equals(employeeNumber)) continue;
 
-            String[] dateParts = attData[3].trim().split("/");
-            int m = Integer.parseInt(dateParts[0]);
-            int d = Integer.parseInt(dateParts[1]);
+            String[] dateParts = attendanceData[3].trim().split("/");
+            int month = Integer.parseInt(dateParts[0]);
+            int day = Integer.parseInt(dateParts[1]);
 
-            if (m == month && d >= startDay && d <= endDay) {
-                totalHours += computeDailyHours(attData[4].trim(), attData[5].trim());
+            if (month == monthInput && day >= startDay && day <= endDay) {
+                totalHours += computeDailyHours(attendanceData[4].trim(), attendanceData[5].trim());
             }
         }
         reader.close();
@@ -234,12 +235,12 @@ public class MotorPHApp {
         LocalTime end = LocalTime.parse(logOut, timeFormat);
         LocalTime workStart = LocalTime.of(8, 0);
         LocalTime workEnd = LocalTime.of(17, 0);
-        LocalTime graceEnd = LocalTime.of(8, 10); // 10-minute grace period
+        LocalTime gracePeriodEnd = LocalTime.of(8, 10); // 10-minute grace period
 
         // If login is early or within grace period (8:00–8:10), treat as 8:00.
         // If login is 8:11 or later, use actual login time.
         LocalTime effectiveStart;
-        if (!start.isAfter(graceEnd)) {
+        if (!start.isAfter(gracePeriodEnd)) {
             effectiveStart = workStart;
         } else {
             effectiveStart = start;
@@ -454,15 +455,15 @@ public class MotorPHApp {
 
     // Searches the employee CSV for a matching employee number and returns their data,
     // or null if not found.
-    public static String[] findEmployee(String empNum) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(employeeData));
+    public static String[] findEmployee(String employeeNumber) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(employeeDataFile));
         reader.readLine(); // Skip the first line
         String line;
         while ((line = reader.readLine()) != null) {
-            String[] empData = parseCSVLine(line);
-            if (empData[0].trim().equals(empNum)) {
+            String[] employeeData = parseCSVLine(line);
+            if (employeeData[0].trim().equals(employeeNumber)) {
                 reader.close();
-                return empData;
+                return employeeData;
             }
         }
         reader.close();
@@ -470,15 +471,15 @@ public class MotorPHApp {
     }
 
     // Reads the year from the first matching attendance record for the given employee.
-    public static int getYearFromAttendance(String empNum) throws Exception {
+    public static int getYearFromAttendance(String employeeNumber) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(attendanceRecords));
         reader.readLine(); // Skip first line
         String line;
         while ((line = reader.readLine()) != null) {
-            String[] attData = parseCSVLine(line);
-            if (attData[0].trim().equals(empNum)) {
+            String[] attendanceData = parseCSVLine(line);
+            if (attendanceData[0].trim().equals(employeeNumber)) {
                 reader.close();
-                return Integer.parseInt(attData[3].trim().split("/")[2]);
+                return Integer.parseInt(attendanceData[3].trim().split("/")[2]);
             }
         }
         reader.close();
