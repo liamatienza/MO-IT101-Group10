@@ -21,9 +21,9 @@ public class MotorPHApp {
     // appropriate menu based on the username and password entered.
     public static void main(String[] args) throws Exception {
         System.out.print("Username: ");
-        String username = scanner.nextLine();
+        String username = scanner.nextLine().trim();
         System.out.print("Password: ");
-        String password = scanner.nextLine();
+        String password = scanner.nextLine().trim();
 
         if (Objects.equals(username, "employee") && Objects.equals(password, "12345")) {
             employeeMenu();
@@ -156,15 +156,20 @@ public class MotorPHApp {
 
         printEmployeeDetails(employeeData, hourlyRate);
 
-        for (int month = 6; month <= 12; month++) {
+        for (int month = 1; month <= 12; month++) {
             int lastDay = YearMonth.of(year, month).lengthOfMonth();
             double[] payrollData = computePayroll(employeeNumber, month, lastDay, hourlyRate);
-            printPayroll(month, lastDay, payrollData);
+
+            // Only display payroll only if there are hours worked.
+            double totalHours = payrollData[0] + payrollData[2]; // hours1st + hours2nd
+            if (totalHours > 0) {
+                printPayroll(month, lastDay, payrollData);
+            }
         }
     }
 
     // Computes and returns the payroll figures for a given month as an array containing
-    // hours and gross for both periods, plus SSS, PhilHealth, Pag-IBIG, tax, and total deductions.
+    // hours worked and gross pay for both periods, plus SSS, PhilHealth, Pag-IBIG, tax deductions.
     public static double[] computePayroll(String employeeNumber, int month, int lastDay, double hourlyRate) throws Exception {
         double hours1st = computeHoursForPeriod(employeeNumber, month, 1, 15);
         double gross1st = hours1st * hourlyRate;
