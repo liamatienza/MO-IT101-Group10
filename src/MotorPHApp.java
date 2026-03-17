@@ -319,7 +319,7 @@ public class MotorPHApp {
     // Returns the monthly withholding tax based on tax brackets
     // applied to the employee's taxable income.
     public static double computeWithholdingTax(double taxableIncome) {
-        double tax = 0.0;
+        double tax;
 
         if (taxableIncome <= 20832) {
             tax = 0.0;
@@ -381,7 +381,7 @@ public class MotorPHApp {
         }
         // Save the last field since it has no trailing comma.
         fields[fieldIndex] = current;
-        
+
         return fields;
     }
 
