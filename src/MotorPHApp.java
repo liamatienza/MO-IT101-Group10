@@ -147,9 +147,8 @@ public class MotorPHApp {
     }
 
     // ==================== PAYROLL DISPLAY ====================
-
-    // Prints a full payroll breakdown for the given employee across June to December,
-    // split into two periods per month with deductions applied in the second half.
+    // Prints the employee's payroll breakdown for June through December by computing
+    // and displaying the payroll data for each month.
     public static void displayPayroll(String[] employeeData) throws Exception {
         String employeeNumber = employeeData[0];
         double hourlyRate = parseMoney(employeeData[18]);
@@ -159,34 +158,48 @@ public class MotorPHApp {
 
         for (int month = 6; month <= 12; month++) {
             int lastDay = YearMonth.of(year, month).lengthOfMonth();
-            double hours1st = computeHoursForPeriod(employeeNumber, month, 1, 15);
-            double gross1st = hours1st * hourlyRate;
-            double hours2nd = computeHoursForPeriod(employeeNumber, month, 16, lastDay);
-            double gross2nd = hours2nd * hourlyRate;
-            double totalGross = gross1st + gross2nd;
-            double sss = computeSSS(totalGross);
-            double philHealth = computePhilHealth(totalGross);
-            double pagIbig = computePagIbig(totalGross);
-            double taxableIncome = totalGross - (sss + philHealth + pagIbig);
-            double tax = computeWithholdingTax(taxableIncome);
-            double totalDeductions = sss + philHealth + pagIbig + tax;
-
-            System.out.println("\n--- " + MONTH_NAMES[month] + " 1 to 15 ---");
-            System.out.printf("Total Hours Worked: %.2f%n", hours1st);
-            System.out.printf("Gross Salary: ₱%,.2f%n", gross1st);
-            System.out.printf("Net Salary: ₱%,.2f%n", gross1st);
-
-            System.out.println("\n--- " + MONTH_NAMES[month] + " 16 to " + lastDay + " ---");
-            System.out.printf("Total Hours Worked: %.2f%n", hours2nd);
-            System.out.printf("Gross Salary: ₱%,.2f%n", gross2nd);
-            System.out.println("Deductions:");
-            System.out.printf("  SSS: ₱%,.2f%n", sss);
-            System.out.printf("  PhilHealth: ₱%,.2f%n", philHealth);
-            System.out.printf("  Pag-IBIG: ₱%,.2f%n", pagIbig);
-            System.out.printf("  Tax: ₱%,.2f%n", tax);
-            System.out.printf("Total Deductions: ₱%,.2f%n", totalDeductions);
-            System.out.printf("Net Salary: ₱%,.2f%n", gross2nd - totalDeductions);
+            double[] payrollData = computePayroll(employeeNumber, month, lastDay, hourlyRate);
+            printPayroll(month, lastDay, payrollData);
         }
+    }
+
+    // Computes and returns the payroll figures for a given month as an array containing
+    // hours and gross for both periods, plus SSS, PhilHealth, Pag-IBIG, tax, and total deductions.
+    public static double[] computePayroll(String employeeNumber, int month, int lastDay, double hourlyRate) throws Exception {
+        double hours1st = computeHoursForPeriod(employeeNumber, month, 1, 15);
+        double gross1st = hours1st * hourlyRate;
+        double hours2nd = computeHoursForPeriod(employeeNumber, month, 16, lastDay);
+        double gross2nd = hours2nd * hourlyRate;
+        double totalGross = gross1st + gross2nd;
+        double sss = computeSSS(totalGross);
+        double philHealth = computePhilHealth(totalGross);
+        double pagIbig = computePagIbig(totalGross);
+        double taxableIncome = totalGross - (sss + philHealth + pagIbig);
+        double tax = computeWithholdingTax(taxableIncome);
+        double totalDeductions = sss + philHealth + pagIbig + tax;
+
+        double[] payrollData = { hours1st, gross1st, hours2nd, gross2nd, sss, philHealth, pagIbig, tax, totalDeductions };
+        return payrollData;
+    }
+
+    // Prints the hours worked, gross salary, deductions, and net salary for both
+    // payroll periods of the given month using the precomputed payroll data.
+    public static void printPayroll(int month, int lastDay, double[] payrollData) {
+        System.out.println("\n--- " + MONTH_NAMES[month] + " 1 to 15 ---");
+        System.out.printf("Total Hours Worked: %.2f%n", payrollData[0]);
+        System.out.printf("Gross Salary: ₱%,.2f%n", payrollData[1]);
+        System.out.printf("Net Salary: ₱%,.2f%n", payrollData[1]);
+
+        System.out.println("\n--- " + MONTH_NAMES[month] + " 16 to " + lastDay + " ---");
+        System.out.printf("Total Hours Worked: %.2f%n", payrollData[2]);
+        System.out.printf("Gross Salary: ₱%,.2f%n", payrollData[3]);
+        System.out.println("Deductions:");
+        System.out.printf("  SSS: ₱%,.2f%n", payrollData[4]);
+        System.out.printf("  PhilHealth: ₱%,.2f%n", payrollData[5]);
+        System.out.printf("  Pag-IBIG: ₱%,.2f%n", payrollData[6]);
+        System.out.printf("  Tax: ₱%,.2f%n", payrollData[7]);
+        System.out.printf("Total Deductions: ₱%,.2f%n", payrollData[8]);
+        System.out.printf("Net Salary: ₱%,.2f%n", payrollData[3] - payrollData[8]);
     }
 
     // ==================== HOURS CALCULATION ====================
