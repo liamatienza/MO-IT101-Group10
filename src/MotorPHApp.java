@@ -72,11 +72,7 @@ public class MotorPHApp {
         while ((line = reader.readLine()) != null) {
             String[] employeeData = parseCSVLine(line);
             if (employeeData[0].trim().equals(employeeNumber)) {
-                System.out.println("\n===============================");
-                System.out.println("Employee Number: " + employeeData[0]);
-                System.out.println("Employee Name: " + employeeData[1] + ", " + employeeData[2]);
-                System.out.println("Birthday: " + employeeData[3]);
-                System.out.println("===============================");
+                printEmployeeDetails(employeeData, null);
                 found = true;
                 break;
             }
@@ -156,15 +152,10 @@ public class MotorPHApp {
     // split into two periods per month with deductions applied in the second half.
     public static void displayPayroll(String[] employeeData) throws Exception {
         String employeeNumber = employeeData[0];
-        String employeeName = employeeData[1] + ", " + employeeData[2];
-        String birthday = employeeData[3];
         double hourlyRate = parseMoney(employeeData[18]);
         int year = getYearFromAttendance(employeeNumber);
 
-        System.out.println("\nEmployee #: " + employeeNumber);
-        System.out.println("Employee Name: " + employeeName);
-        System.out.println("Birthday: " + birthday);
-        System.out.println("Hourly Rate: " + hourlyRate);
+        printEmployeeDetails(employeeData, hourlyRate);
 
         for (int month = 6; month <= 12; month++) {
             int lastDay = YearMonth.of(year, month).lengthOfMonth();
@@ -419,5 +410,17 @@ public class MotorPHApp {
         }
         reader.close();
         return java.time.Year.now().getValue(); // Fallback to current year if no record is found.
+    }
+
+    // Prints employee details. Pass hourlyRate to include it, or null to ignore.
+    public static void printEmployeeDetails(String[] employeeData, Double hourlyRate) {
+        System.out.println("\n===============================");
+        System.out.println("Employee #: " + employeeData[0]);
+        System.out.println("Employee Name: " + employeeData[1] + ", " + employeeData[2]);
+        System.out.println("Birthday: " + employeeData[3]);
+        if (hourlyRate != null) {
+            System.out.printf("Hourly Rate: ₱%,.2f%n", hourlyRate);
+        }
+        System.out.println("===============================");
     }
 }
