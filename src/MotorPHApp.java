@@ -264,7 +264,7 @@ public class MotorPHApp {
         if (minutes > 60) minutes -= 60;
         else minutes = 0;
 
-        return minutes / 60.0;
+        return Math.min(minutes / 60.0, 8.0);
     }
 
     // ==================== DEDUCTIONS ====================
