@@ -182,14 +182,19 @@ public class MotorPHApp {
         double taxableIncome = totalGross - (sss + philHealth + pagIbig);
         double tax = computeWithholdingTax(taxableIncome);
         double totalDeductions = sss + philHealth + pagIbig + tax;
+        double netSalary = totalGross - totalDeductions;
 
-        double[] payrollData = { hours1st, gross1st, hours2nd, gross2nd, sss, philHealth, pagIbig, tax, totalDeductions };
+        double[] payrollData = { hours1st, gross1st, hours2nd, gross2nd, sss, philHealth, pagIbig, tax, totalDeductions, netSalary };
         return payrollData;
     }
 
     // Prints the hours worked, gross salary, deductions, and net salary for both
     // payroll periods of the given month using the precomputed payroll data.
     public static void printPayroll(int month, int lastDay, double[] payrollData) {
+
+        // Payroll data array structure (from computePayroll method):
+        // [0] = hours1st, [1] = gross1st, [2] = hours2nd, [3] = gross2nd, [4] = sss, [5] = philHealth, [6] = pagIbig, [7] = tax, [8] = totalDeductions, [9] = netSalary
+
         System.out.println("\n--- " + MONTH_NAMES[month] + " 1 to 15 ---");
         System.out.printf("Total Hours Worked: %.2f%n", payrollData[0]);
         System.out.printf("Gross Salary: ₱%,.2f%n", payrollData[1]);
@@ -204,7 +209,7 @@ public class MotorPHApp {
         System.out.printf("  Pag-IBIG: ₱%,.2f%n", payrollData[6]);
         System.out.printf("  Tax: ₱%,.2f%n", payrollData[7]);
         System.out.printf("Total Deductions: ₱%,.2f%n", payrollData[8]);
-        System.out.printf("Net Salary: ₱%,.2f%n", payrollData[3] - payrollData[8]);
+        System.out.printf("Net Salary: ₱%,.2f%n", payrollData[9]);
     }
 
     // ==================== HOURS CALCULATION ====================
