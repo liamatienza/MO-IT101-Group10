@@ -17,8 +17,8 @@ public class MotorPHApp {
             "July", "August", "September", "October", "November", "December"
     };
 
-    // Entry point of the application. Prompts for credentials and routes to the
-    // appropriate menu based on the username and password entered.
+    // Entry point of the app. Prompts for credentials and routes to the right menu
+    // so only the correct user can access their features.
     public static void main(String[] args) throws Exception {
         System.out.print("Username: ");
         String username = scanner.nextLine().trim();
@@ -36,8 +36,8 @@ public class MotorPHApp {
 
     // ==================== EMPLOYEE MENU ====================
 
-    // Displays the employee menu in a loop, allowing the user to search by employee
-    // number or exit the program.
+    // Shows the employee menu in a loop so users can keep searching by employee
+    // number or exit when done.
     public static void employeeMenu() throws Exception {
         while (true) {
             System.out.println("\n--- Employee Menu ---");
@@ -59,8 +59,8 @@ public class MotorPHApp {
         }
     }
 
-    // Prompts for an employee number and prints the matching employee's details.
-    // Displays an error if no match is found.
+    // Asks for an employee number and prints their details so employees can look up
+    // their own information. Shows an error if no match is found.
     public static void searchEmployee() throws Exception {
         System.out.print("\nEnter employee number: ");
         String employeeNumber = scanner.nextLine();
@@ -72,7 +72,7 @@ public class MotorPHApp {
         while ((line = reader.readLine()) != null) {
             String[] employeeData = parseCSVLine(line);
             if (employeeData[0].trim().equals(employeeNumber)) {
-                printEmployeeDetails(employeeData, null);
+                printEmployeeDetails(employeeData, null); // Returning null for hourly rate parameter since it's not needed in this context.
                 found = true;
                 break;
             }
@@ -84,8 +84,8 @@ public class MotorPHApp {
 
     // ==================== PAYROLL MENU ====================
 
-    // Displays the payroll staff menu in a loop, allowing the user to process
-    // payroll or exit the program.
+    // Shows the payroll menu in a loop so staff can keep processing payroll
+    // or exit when done.
     public static void payrollMenu() throws Exception {
         while (true) {
             System.out.println("\n--- Payroll Staff Menu ---");
@@ -107,7 +107,8 @@ public class MotorPHApp {
         }
     }
 
-    // Presents a sub-menu to process payroll for a single employee or all employees.
+    // Shows a sub-menu for running payroll on one or all employees so staff
+    // can choose the right scope.
     public static void processPayrollMenu() throws Exception {
         while (true) {
             System.out.println("\n--- Process Payroll ---");
@@ -147,8 +148,9 @@ public class MotorPHApp {
     }
 
     // ==================== PAYROLL DISPLAY ====================
-    // Prints the employee's payroll breakdown for June through December by computing
-    // and displaying the payroll data for each month.
+
+    // Prints the employee's monthly payroll breakdown for the whole year,
+    // skipping months where no hours were worked.
     public static void displayPayroll(String[] employeeData) throws Exception {
         String employeeNumber = employeeData[0];
         double hourlyRate = parseMoney(employeeData[18]);
@@ -160,7 +162,7 @@ public class MotorPHApp {
             int lastDay = YearMonth.of(year, month).lengthOfMonth();
             double[] payrollData = computePayroll(employeeNumber, month, lastDay, hourlyRate);
 
-            // Only display payroll only if there are hours worked.
+            // Skip months with no hours so empty periods don't clutter the output.
             double totalHours = payrollData[0] + payrollData[2]; // hours1st + hours2nd
             if (totalHours > 0) {
                 printPayroll(month, lastDay, payrollData);
@@ -168,8 +170,8 @@ public class MotorPHApp {
         }
     }
 
-    // Computes and returns the payroll figures for a given month as an array containing
-    // hours worked and gross pay for both periods, plus SSS, PhilHealth, Pag-IBIG, tax deductions.
+    // Computes and returns hours, gross pay, and all deductions for a given month
+    // as an array so the display method has everything it needs.
     public static double[] computePayroll(String employeeNumber, int month, int lastDay, double hourlyRate) throws Exception {
         double hours1st = computeHoursForPeriod(employeeNumber, month, 1, 15);
         double gross1st = hours1st * hourlyRate;
@@ -188,8 +190,8 @@ public class MotorPHApp {
         return payrollData;
     }
 
-    // Prints the hours worked, gross salary, deductions, and net salary for both
-    // payroll periods of the given month using the precomputed payroll data.
+    // Prints hours, gross, deductions, and net pay for both periods of a month
+    // using precomputed data so display and calculation stay separate.
     public static void printPayroll(int month, int lastDay, double[] payrollData) {
 
         // Payroll data array structure (from computePayroll method):
@@ -214,8 +216,8 @@ public class MotorPHApp {
 
     // ==================== HOURS CALCULATION ====================
 
-    // Calculates total hours worked by an employee within a given date range in a month
-    // by reading and filtering the attendance CSV records.
+    // Reads the attendance CSV and total hours worked within a date range
+    // so each pay period can be calculated separately.
     public static double computeHoursForPeriod(String employeeNumber, int monthInput, int startDay, int endDay) throws Exception {
         double totalHours = 0;
         BufferedReader reader = openFile(attendanceRecords);
@@ -237,8 +239,8 @@ public class MotorPHApp {
         return totalHours;
     }
 
-    // Computes hours worked in a single day based on login and logout times, applying
-    // an 8AM–5PM work window, a 10-minute grace period, and a 1-hour lunch deduction.
+    // Computes daily hours from login and logout times using the 8AM–5PM window,
+    // grace period, and lunch break so hours are counted consistently.
     public static double computeDailyHours(String logIn, String logOut) {
         DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("H:mm");
         LocalTime start = LocalTime.parse(logIn, timeFormat);
@@ -247,8 +249,7 @@ public class MotorPHApp {
         LocalTime workEnd = LocalTime.of(17, 0);
         LocalTime gracePeriodEnd = LocalTime.of(8, 10); // 10-minute grace period
 
-        // If login is early or within grace period (8:00–8:10), treat as 8:00.
-        // If login is 8:11 or later, use actual login time.
+        // Treat logins at or before 8:10 as exactly 8:00 so only arrivals past the grace period lose hours.
         LocalTime effectiveStart;
         if (!start.isAfter(gracePeriodEnd)) {
             effectiveStart = workStart;
@@ -274,8 +275,8 @@ public class MotorPHApp {
 
     // ==================== DEDUCTIONS ====================
 
-    // Returns the employee's SSS contribution by looking up the gross salary
-    // against a tiered bracket table stored in a 2D array.
+    // Returns the SSS contribution by matching gross salary to a bracket table
+    // so the correct deduction is used.
     public static double computeSSS(double grossSalary) {
         double[][] sssBrackets = {
                 { 3250, 135.00 },  { 3750, 157.50 },  { 4250, 180.00 },  { 4750, 202.50 },
@@ -291,16 +292,16 @@ public class MotorPHApp {
                 { 23250, 1035.00 }, { 23750, 1057.50 }, { 24250, 1080.00 }, { 24750, 1102.50 }
         };
 
-        // Scan and return the contribution for the first matching bracket.
+        // Stop at the first bracket where salary is less than the threshold so the right tier is returned.
         for (double[] bracket : sssBrackets) {
             if (grossSalary < bracket[0]) return bracket[1];
         }
 
-        return 1125.00; // 24,750 and over
+        return 1125.00; // for grossSalary of 24,750 and over
     }
 
-    // Returns the employee's PhilHealth contribution at 1.5% of gross salary,
-    // with no contribution below ₱10,000 and a ₱900 cap at ₱60,000 and above.
+    // Returns the PhilHealth contribution at 1.5% of gross salary, with no deduction
+    // below ₱10,000 and a ₱900 cap at ₱60,000.
     public static double computePhilHealth(double grossSalary) {
         if (grossSalary < 10000) {
             return 0.00;
@@ -311,8 +312,8 @@ public class MotorPHApp {
         }
     }
 
-    // Returns the employee's Pag-IBIG contribution (1%–2% of gross salary),
-    // capped at a maximum of ₱100 per month.
+    // Returns the Pag-IBIG contribution (1%–2% of gross salary, max ₱100)
+    // so the correct amount is deducted.
     public static double computePagIbig(double grossSalary) {
         double contribution;
         if (grossSalary < 1000) {
@@ -330,8 +331,8 @@ public class MotorPHApp {
         return contribution;
     }
 
-    // Returns the monthly withholding tax based on tax brackets
-    // applied to the employee's taxable income.
+    // Returns the monthly withholding tax using BIR tax brackets so the correct
+    // amount is deducted from taxable income.
     public static double computeWithholdingTax(double taxableIncome) {
         double tax;
 
@@ -354,15 +355,15 @@ public class MotorPHApp {
 
     // ==================== UTILITY ====================
 
-    // Opens a CSV file and skips the header line, returning a ready-to-read BufferedReader.
+    // Opens a CSV file and skips the header so every read starts at the first data row.
     public static BufferedReader openFile(String filePath) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         reader.readLine(); // Skip header line
         return reader;
     }
 
-    // Parses a CSV line into a string array, treating commas inside
-    // double quotes as part of the field rather than a separator.
+    // Splits a CSV line into fields while ignoring commas inside quotes
+    // so fields with commas in them are not broken apart.
     public static String[] parseCSVLine(String line) {
         // Count total fields by tracking commas outside quoted sections.
         int count = 1;
@@ -376,7 +377,7 @@ public class MotorPHApp {
             }
         }
 
-        // Extract each field, splitting only on unquoted commas.
+        // Split only on unquoted commas so quoted fields with commas stay intact.
         String[] fields = new String[count];
         int fieldIndex = 0;
         inQuotes = false;
@@ -393,13 +394,14 @@ public class MotorPHApp {
                 current += c;
             }
         }
-        // Save the last field since it has no trailing comma.
+        // Save the last field since there's no trailing comma to trigger a split.
         fields[fieldIndex] = current;
 
         return fields;
     }
 
-    // Strips commas and quotes from a money-formatted string and returns it as a double.
+    // Strips commas and quotes from a money string and returns it as a Double
+    // so CSV values can be used in calculations.
     public static double parseMoney(String value) {
         return Double.parseDouble(value.trim().replace(",", "").replace("\"", ""));
     }
@@ -420,7 +422,8 @@ public class MotorPHApp {
         return null;
     }
 
-    // Reads the year from the first matching attendance record for the given employee.
+    // Reads the year from the employee's first attendance record so payroll months
+    // are computed for the right year.
     public static int getYearFromAttendance(String employeeNumber) throws Exception {
         BufferedReader reader = openFile(attendanceRecords);
         String line;
@@ -435,7 +438,8 @@ public class MotorPHApp {
         return java.time.Year.now().getValue(); // Fallback to current year if no record is found.
     }
 
-    // Prints employee details. Pass hourlyRate to include it, or null to ignore.
+    // Prints employee details, including hourly rate if provided, so the same method
+    // works for both employee lookup and payroll display.
     public static void printEmployeeDetails(String[] employeeData, Double hourlyRate) {
         System.out.println("\n===============================");
         System.out.println("Employee #: " + employeeData[0]);
